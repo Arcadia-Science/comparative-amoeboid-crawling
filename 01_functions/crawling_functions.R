@@ -1,14 +1,14 @@
 #rm(list=ls());
 options(stringsAsFactors=F);
-install.packages("umap")
-install.packages("scales")
-install.packages("MASS")
-install.packages("RColorBrewer")
-install.packages("colorRamps")
-install.packages("vegan")
-install.packages("igraph")
-install.packages("entropy")
-install.packages("jpeg")
+#install.packages("umap")
+#install.packages("scales")
+#install.packages("MASS")
+#install.packages("RColorBrewer")
+#install.packages("colorRamps")
+#install.packages("vegan")
+#install.packages("igraph")
+#install.packages("entropy")
+#install.packages("jpeg")
 
 library(umap)
 library(scales)
