@@ -2,7 +2,7 @@
 
 This repository contains analysis code to accompany the publication 'Comparative analyses reveal substantial variation among unicellular organisms' (link).
 
-Notebooks containing expanded methods and the code + analyses for generating all figures in the publication can be run via binder:
+Notebooks containing expanded methods and the code + analyses for generating all figures in the publication can be run in
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ryanayork/comparative-amoeboid-crawling/main)
 
 
