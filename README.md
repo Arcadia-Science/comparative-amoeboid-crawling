@@ -13,12 +13,12 @@ Notebooks containing expanded methods and the code + analyses for generating all
 
 ---
 
-**The repo is structured as follows:** <br>
+**Directory structure** <br>
 
-'00_data': Contains cell shape matrices for all cell types/trials examined in the pub.<br>
-'01_utils': Contains .R code necessary to run the analyses presented in the pub and accompanying Jupyter notebooks.<br>
-'02_analysis_files': Contains cached intermediate files generated from the analyses contained in the repo, including the movement space embeddings used in the pub to facilitate replication of the published figures.<br>
-'03_notebooks': Contains three Jupyter notebooks outlining the full suite of analyses presented in the pub.<br>
+--`00_data/` Cell shape data matrices for all cell types/trials examined in the pub.<br>
+--`01_utils/` .R code necessary to run the analyses presented in the pub and accompanying Jupyter notebooks.<br>
+--`02_analysis_files/` Cached intermediate files generated from the analyses contained in the repo, including the movement space embeddings used in the pub to facilitate replication of the published figures.<br>
+--`03_notebooks/` Jupyter notebooks outlining the full suite of analyses presented in the pub.<br>
 
 ---
 
