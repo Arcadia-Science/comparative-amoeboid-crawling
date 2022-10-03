@@ -1,6 +1,6 @@
 # Comparative amoeboid crawling
 
-This repository contains analysis code to accompany the publication 'Comparative analyses reveal substantial variation among unicellular organisms' [link](https://research.arcadiascience.com/pub/result-comparative-crawling/draft).
+This repository contains analysis code to accompany the publication 'Comparative analyses reveal substantial variation among unicellular organisms' ([link](https://research.arcadiascience.com/pub/result-comparative-crawling/draft)).
 
 Notebooks containing expanded methods and the code + analyses for generating all figures in the publication can be run in Binder:
 
