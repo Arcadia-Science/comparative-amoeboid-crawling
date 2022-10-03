@@ -1,4 +1,5 @@
 options(stringsAsFactors = F)
+
 library(umap)
 library(scales)
 library(MASS)
@@ -572,15 +573,15 @@ plot_umap_markov <- function(layout,
   chord$toy <- toy
   
   # Split into self and not
-  chord_s <- chord[chord$rn == chord$cn, ]
-  chord <- chord[!chord$rn == chord$cn, ]
+  chord_s <- chord[chord$rn == chord$cn,]
+  chord <- chord[!chord$rn == chord$cn,]
   
   # Make colors not alpha
   chord_s$col <- substr(chord_s$col, 1, 7)
   chord$col <- substr(chord$col, 1, 7)
   
   # Remove zeroes
-  chord <- chord[!chord$value1 == 0, ]
+  chord <- chord[!chord$value1 == 0,]
   
   if (plot_umap_points == FALSE) {
     plot(
