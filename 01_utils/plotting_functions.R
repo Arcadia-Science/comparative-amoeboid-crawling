@@ -9,6 +9,7 @@ library(vegan)
 library(igraph)
 library(entropy)
 library(jpeg)
+library(repr)
 
 ############################
 #####Plotting functions#####
