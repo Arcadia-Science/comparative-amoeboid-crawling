@@ -10,18 +10,14 @@ Notebooks containing expanded methods and the code + analyses for generating all
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ryanayork/comparative-amoeboid-crawling/main)
 
----
-
-**Directory structure** <br>
+## Directory structure
 
 `00_data/` Cell shape data matrices for all cell types/trials examined in the pub.<br>
 `01_utils/` .R code necessary to run the analyses presented in the pub and accompanying Jupyter notebooks.<br>
 `02_analysis_files/` Cached intermediate files generated from the analyses contained in the repo, including the movement space embeddings used in the pub to facilitate replication of the published figures.<br>
 `03_notebooks/` Jupyter notebooks outlining the full suite of analyses presented in the pub.<br>
 
----
-
-**R packages and versions used in this repo:**<br>
+## R packages and versions used in this repo:
 
 `umap v0.2.7.0`<br>
 `scales v1.1.1`<br>
