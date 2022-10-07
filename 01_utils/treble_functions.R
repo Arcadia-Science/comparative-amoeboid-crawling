@@ -10,6 +10,9 @@ library(igraph)
 library(entropy)
 library(jpeg)
 library(repr)
+library(shape)
+library(gtools)
+library(entropy)
 
 ##########################
 #####TREBLE functions#####
@@ -26,7 +29,7 @@ load_images = function(image_directory) {
   for (i in 1:length(files)) {
     setwd(paste(files[i], '/', 'masks_normalized/', sep = ''))
     f = list.files(full.names = FALSE)
-    f = gtools::mixedsort(sort(f))
+    f = mixedsort(sort(f))
     
     imgs = list()
     for (j in 1:length(f)) {
@@ -451,7 +454,7 @@ calculate_recurrence = function(umaps,
         lapply(results, function(x)
           x$histogram$counts[1:200] / max(x$histogram$counts[1:200]))
       ),
-      col = colorRamps::matlab.like(32),
+      col = matlab.like(32),
       xaxt = 'n',
       yaxt = 'n',
       xlab = 'Time',
@@ -553,7 +556,7 @@ calculate_bin_entropies = function(bin,
                 v[2]
               }))))
           
-          w = MASS::kde2d(
+          w = kde2d(
             row[, 1],
             row[, 2],
             h = c(1, 1),
@@ -562,7 +565,7 @@ calculate_bin_entropies = function(bin,
           )$z
           
           pdf = as.numeric(unlist(as.data.frame(w)))
-          entropies = c(entropies, entropy::entropy(pdf, unit = 'log2'))
+          entropies = c(entropies, entropy(pdf, unit = 'log2'))
         }
         
       }
@@ -584,7 +587,7 @@ calculate_bin_entropies = function(bin,
               v[2]
             }))))
         
-        w = MASS::kde2d(
+        w = kde2d(
           row[, 1],
           row[, 2],
           h = c(1, 1),
@@ -593,7 +596,7 @@ calculate_bin_entropies = function(bin,
         )$z
         
         pdf = as.numeric(unlist(as.data.frame(w)))
-        entropies = c(entropies, entropy::entropy(pdf, unit = 'log2'))
+        entropies = c(entropies, entropy(pdf, unit = 'log2'))
       }
     }
     

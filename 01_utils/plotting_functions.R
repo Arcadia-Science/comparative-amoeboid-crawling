@@ -10,6 +10,9 @@ library(igraph)
 library(entropy)
 library(jpeg)
 library(repr)
+library(shape)
+library(gtools)
+library(entropy)
 
 ############################
 #####Plotting functions#####
@@ -317,7 +320,7 @@ plot_vector_field <- function(layout,
       xaxt = "n",
       yaxt = "n"
     )
-    shape::Arrows(
+    Arrows(
       df[, 1],
       df[, 2],
       df[, 1] + df[, 3] / 2,
@@ -340,7 +343,7 @@ plot_vector_field <- function(layout,
       xaxt = "n",
       yaxt = "n"
     )
-    shape::Arrows(
+    Arrows(
       df[, 1],
       df[, 2],
       df[, 1] + df[, 3] / 2,
@@ -516,149 +519,5 @@ plot_umap_pdf <- function(layout,
   # Return if desired
   if (return == TRUE) {
     return(pdf)
-  }
-}
-
-# Function to plot markov on umap
-plot_umap_markov <- function(layout,
-                             bin_umap = FALSE,
-                             n_bins = 16,
-                             chord,
-                             plot_umap_points = TRUE,
-                             plot_self = FALSE,
-                             plot_dynamic_points = FALSE,
-                             lwd_scale = 50,
-                             curve = 0.2,
-                             arr.width = 0,
-                             point_col = NULL,
-                             arr.length = 0) {
-  # Bin if desired
-  if (bin_umap == TRUE) {
-    layout <- bin_umap(layout, n_bins = n_bins)$layout
-  }
-  
-  # Get markov
-  probs <- fitHigherOrder(layout$xy_new, 2)$Q[[1]]
-  probs[probs < 0.1] <- 0
-  
-  # Get chord
-  chord <- circlize::chordDiagram(
-    probs,
-    directional = TRUE,
-    grid.col = alpha("grey60", 0.5),
-    annotationTrack = c("name", "grid")
-  )
-  
-  # Plotting in umap
-  # Reformat chord diagram coords
-  fromx <-
-    as.numeric(unlist(lapply(strsplit(chord$rn, "_"), function(v) {
-      v[1]
-    })))
-  fromy <-
-    as.numeric(unlist(lapply(strsplit(chord$rn, "_"), function(v) {
-      v[2]
-    })))
-  tox <-
-    as.numeric(unlist(lapply(strsplit(chord$cn, "_"), function(v) {
-      v[1]
-    })))
-  toy <-
-    as.numeric(unlist(lapply(strsplit(chord$cn, "_"), function(v) {
-      v[2]
-    })))
-  
-  chord$fromx <- fromx
-  chord$fromy <- fromy
-  chord$tox <- tox
-  chord$toy <- toy
-  
-  # Split into self and not
-  chord_s <- chord[chord$rn == chord$cn,]
-  chord <- chord[!chord$rn == chord$cn,]
-  
-  # Make colors not alpha
-  chord_s$col <- substr(chord_s$col, 1, 7)
-  chord$col <- substr(chord$col, 1, 7)
-  
-  # Remove zeroes
-  chord <- chord[!chord$value1 == 0,]
-  
-  if (plot_umap_points == FALSE) {
-    plot(
-      layout$xnew,
-      layout$ynew,
-      pch = 20,
-      col = NULL,
-      bty = "n",
-      xaxt = "n",
-      yaxt = "n",
-      xlab = "",
-      ylab = ""
-    )
-  } else {
-    plot(
-      layout$xnew,
-      layout$ynew,
-      pch = 20,
-      col = point_col,
-      cex = 3,
-      bty = "n",
-      xaxt = "n",
-      yaxt = "n",
-      xlab = "",
-      ylab = ""
-    )
-  }
-  
-  for (i in 1:nrow(chord)) {
-    diagram::curvedarrow(
-      from = c(chord$fromx[i], chord$fromy[i]),
-      to = c(chord$tox[i], chord$toy[i]),
-      lcol = chord$col[i],
-      lwd = chord$value1[i] * lwd_scale,
-      arr.pos = 0.9,
-      curve = curve,
-      arr.type = "triangle",
-      arr.length = arr.length,
-      arr.width = arr.width
-    )
-  }
-  
-  if (plot_self == TRUE) {
-    for (i in 1:nrow(chord)) {
-      diagram::selfarrow(
-        c(chord$fromx[i], chord$fromy[i]),
-        lcol = chord$col[i],
-        lwd = chord$value1[i] * lwd_scale,
-        curve = 0.2,
-        arr.length = 0,
-        arr.width = 0
-      )
-    }
-  }
-  
-  if (plot_dynamic_points == TRUE) {
-    f <- table(k$cluster)
-    f <- f / sum(f)
-    
-    for (i in 1:nrow(k$centers)) {
-      points(
-        k$centers[i, 1],
-        k$centers[i, 2],
-        pch = 21,
-        bg = cols[i],
-        col = darken_color(cols[i]),
-        cex = 4 + (2 * f[i])
-      )
-    }
-  } else {
-    points(
-      k$centers,
-      pch = 21,
-      bg = cols,
-      col = darken_color(cols),
-      cex = 4
-    )
   }
 }

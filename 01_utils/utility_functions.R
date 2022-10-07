@@ -10,6 +10,9 @@ library(igraph)
 library(entropy)
 library(jpeg)
 library(repr)
+library(shape)
+library(gtools)
+library(entropy)
 
 ###########################
 #####Utility functions#####
