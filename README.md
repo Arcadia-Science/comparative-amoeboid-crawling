@@ -36,3 +36,5 @@ Notebooks containing expanded methods and the code + analyses for generating all
 `shape v1.4.6`<br>
 `gtools v3.9.2`<br>
 `entropy v1.3.1`<br>
+`pracma v2.3.8`<br>
+`fractaldim v0.8.5`<br>
