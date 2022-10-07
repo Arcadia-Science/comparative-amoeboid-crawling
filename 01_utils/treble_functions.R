@@ -10,9 +10,15 @@ library(igraph)
 library(entropy)
 library(jpeg)
 library(repr)
+library(swaRm)
+library(dunn.test)
+library(vioplot)
+library(lsa)
 library(shape)
 library(gtools)
 library(entropy)
+library(pracma)
+library(fractaldim)
 
 ##########################
 #####TREBLE functions#####

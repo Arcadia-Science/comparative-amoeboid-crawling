@@ -17,6 +17,8 @@ library(lsa)
 library(shape)
 library(gtools)
 library(entropy)
+library(pracma)
+library(fractaldim)
 
 ###########################
 #####Utility functions#####
