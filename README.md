@@ -33,3 +33,6 @@ Notebooks containing expanded methods and the code + analyses for generating all
 `dunn.test v1.3.5`<br>
 `vioplot v0.3.7`<br>
 `lsa v0.73.3`<br>
+`shape v1.4.6`<br>
+`gtools v3.9.2`<br>
+`entropy v1.3.1`<br>
