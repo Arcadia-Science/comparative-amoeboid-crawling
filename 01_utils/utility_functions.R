@@ -23,17 +23,17 @@ library(fractaldim)
 ###########################
 #####Utility functions#####
 ###########################
-#Function to split a vector into n chunks with x amount of overlap
-splitWithOverlap <- function(vec, seg.length, overlap) {
-  starts = seq(1, nrow(vec), by = seg.length - overlap)
-  ends   = starts + seg.length - 1
+##'splitWithOverlap': Splits a vector into n chunks with x amount of overlap
+splitWithOverlap <- function(vec, seg_length, overlap) {
+  starts = seq(1, nrow(vec), by = seg_length - overlap)
+  ends   = starts + seg_length - 1
   ends[ends > nrow(vec)] = nrow(vec)
   
   lapply(1:length(starts), function(i)
-    vec[starts[i]:ends[i],])
+    vec[starts[i]:ends[i], ])
 }
 
-#Function to darken a given color, useful for plotting
+##'darken_color': Darkens a given color by a defined factor amount, useful for plotting
 darken_color = function(color, factor = 1.4) {
   col <- col2rgb(color)
   col <- col / factor
@@ -41,9 +41,31 @@ darken_color = function(color, factor = 1.4) {
   col
 }
 
-#Function to fit ellipse to points
+##'fit.ellipse': Fits an ellipse to a given set of points in xy space
+#Function taken from: http://r.789695.n4.nabble.com/Fitting-a-half-ellipse-curve-tp2719037p2720560.html
 fit.ellipse <- function (x, y = NULL) {
-
+  # Least squares fitting of an ellipse to point data using the algorithm described in:
+  #   Radim Halir & Jan Flusser. 1998.
+  # Adapted from the original Matlab code by Michael Bedward (2010)
+  # michael.bedward@gmail.com
+  #
+  # Subsequently improved by John Minter (2012)
+  # Arguments:
+  # x, y - x and y coordinates of the data points.
+  #        If a single arg is provided it is assumed to be a
+  #        two column matrix.
+  #
+  # Returns a list with the following elements:
+  #
+  # coef - coefficients of the ellipse as described by the general
+  #        quadratic:  ax^2 + bxy + cy^2 + dx + ey + f = 0
+  #
+  # center - center x and y
+  #
+  # major - major semi-axis length
+  #
+  # minor - minor semi-axis length
+  
   EPS <- 1.0e-8
   dat <- xy.coords(x, y)
   
@@ -54,9 +76,9 @@ fit.ellipse <- function (x, y = NULL) {
   S3 <- t(D2) %*% D2
   T <- -solve(S3) %*% t(S2)
   M <- S1 + S2 %*% T
-  M <- rbind(M[3,] / 2, -M[2,], M[1,] / 2)
+  M <- rbind(M[3, ] / 2,-M[2, ], M[1, ] / 2)
   evec <- eigen(M)$vec
-  cond <- 4 * evec[1,] * evec[3,] - evec[2,] ^ 2
+  cond <- 4 * evec[1, ] * evec[3, ] - evec[2, ] ^ 2
   a1 <- evec[, which(cond > 0)]
   f <- c(a1, T %*% a1)
   names(f) <- letters[1:6]
@@ -69,7 +91,7 @@ fit.ellipse <- function (x, y = NULL) {
       ncol = 2,
       byrow = T
     )
-  b <- matrix(c(-f[4], -f[5]),
+  b <- matrix(c(-f[4],-f[5]),
               nrow = 2,
               ncol = 1,
               byrow = T)
@@ -102,6 +124,6 @@ fit.ellipse <- function (x, y = NULL) {
   )
 }
 
-#Function calculate Euclidean distance
+##'euc.dist': Calculates the Euclidean distance between two sets of xy coordinates
 euc.dist <- function(x1, x2)
   sqrt(sum((x1 - x2) ^ 2))

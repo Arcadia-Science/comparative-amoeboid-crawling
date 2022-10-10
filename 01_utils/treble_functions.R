@@ -23,181 +23,126 @@ library(fractaldim)
 ##########################
 #####TREBLE functions#####
 ##########################
-#Function to load cell image .jpegs
+##'load_images': Loads processed cell images from imoto et al. 2021 into R and compiles into a list of trials
 load_images = function(image_directory) {
+  #Set work directory to where images are contained
   setwd(image_directory)
   
-  #Get directories
+  #Get directories (corresponding to cell types)
   files = list.files()
   
+  #Generate empty list for save images into
   dat = list()
+  
+  #Generate empty vector for saving trial names into
   names = c()
+  
+  #Loop through cell type directories
   for (i in 1:length(files)) {
+    #Set working directory to cell type directory
     setwd(paste(files[i], '/', 'masks_normalized/', sep = ''))
+    
+    #List files in directories
     f = list.files(full.names = FALSE)
+    
+    #Sort to be numerically increasing
     f = mixedsort(sort(f))
     
+    #Create empty list to save images into
     imgs = list()
+    
+    #Loop through all trial directories and load images using 'readJPEG'
     for (j in 1:length(f)) {
       imgs[[f[j]]] = unlist(as.data.frame(readJPEG(f[j])))
     }
     
+    #Add images to data list
     dat[[as.character(files[i])]] = imgs
+    
+    #Add names to names vector
     names = c(names, rep(files[i], length(imgs)))
     
+    #Return to root directory
     setwd('../../')
   }
   
+  #Return list of cell images and names
   l = list(dat, names)
   names(l) = c('images', 'names')
   return(l)
 }
 
-#Function to extract windows of user defined features, size x and stepsize y
+##'get_windows': Extracts windows from a matrix of data features using a desired window size ('window_size') and step size ('step_size)
 get_windows = function(features,
                        window_size = 10,
                        step_size = 1,
                        name = NULL) {
-  #Get windows
-  peaks1 = splitWithOverlap(features, window_size, window_size - step_size)
+  #Use 'splitWithOverlap' to generate windows of desired size
+  win = splitWithOverlap(features, window_size, window_size - step_size)
   
-  #Clean and combine into matrix
-  peaks1 = peaks1[1:(length(peaks1) - window_size)]
-  peaks1 = lapply(peaks1, function(x)
+  #Remove windows that contain NAs (i.e. are timepoints at the end of the matrix that are within the window size distance from the end)
+  win = win[1:(length(win) - window_size)]
+  
+  #Unlist and combine into a matrix
+  win = lapply(win, function(x)
     unlist(as.data.frame(x)))
-  peaks1 = do.call(cbind, peaks1)
+  win = do.call(cbind, win)
   
   if (is.null(name) == FALSE) {
-    colnames(peaks1) = paste(name, '_', rownames(features)[1:ncol(peaks1)], sep = '')
+    #If no names are given, name columns with time points
+    colnames(win) = paste(name, '_', rownames(features)[1:ncol(win)], sep = '')
   } else{
-    colnames(peaks1) = rownames(features)[1:ncol(peaks1)]
+    #If names are given, use as column names
+    colnames(win) = rownames(features)[1:ncol(win)]
   }
   
-  return(peaks1)
+  #Return windows
+  return(win)
 }
 
-#Function to extract velocity windows and (optionally) regularize, size x and stepsize y
-#Velocities are expected to be in columns named: 'translational_velocity', 'angular_velocity', 'sideslip'
-get_velocity_windows = function(features,
-                                include_sideslip = FALSE,
-                                return_xy_windows = FALSE,
-                                window_size = 1,
-                                step_size = 1,
-                                symm = FALSE,
-                                verbose = FALSE,
-                                name = NULL) {
-  #Initialize window list
-  frags = list()
-  xys = list()
-  
-  #Get trajectories
-  for (i in seq(1, (nrow(features) - window_size), step_size)) {
-    if (verbose == TRUE) {
-      if (i %% 10000 == TRUE) {
-        print(i)
-      }
-    }
-    
-    #Get velocity vectors
-    vt = features$translational_velocity[seq(i, i + window_size, 1)]
-    vr = features$angular_velocity[seq(i, i + window_size, 1)]
-    if (include_sideslip == TRUE) {
-      vs = features$sideslip[seq(i, i + window_size, 1)]
-    }
-    x = features$x[seq(i, i + window_size, 1)]
-    y = features$y[seq(i, i + window_size, 1)]
-    
-    time = features$time[seq(i, i + window_size, 1)]
-    
-    #Subtract first frame make t0 = 0
-    vr = vr - vr[1]
-    if (include_sideslip == TRUE) {
-      vs = vs - vs[1]
-    }
-    
-    #Multiply by sign of second frame to normalize turn direction
-    if (symm == TRUE) {
-      if (vr[2] < 0) {
-        vr = vr * (-1)
-      }
-      
-      if (include_sideslip == TRUE) {
-        if (vs[2] < 0) {
-          vs = vs * (-1)
-        }
-      }
-      
-      vr = abs(vr)
-      
-      if (include_sideslip == TRUE) {
-        vs = abs(vs)
-      }
-    }
-    
-    #Look at time difference
-    t_diff = diff(time)
-    
-    if (include_sideslip == TRUE) {
-      frags[[paste(time[1], "_", time[length(time)], "_", name, sep = "")]] = c(vt, vr, vs)
-      xys[[paste(time[1], "_", time[length(time)], "_", name, sep = "")]] = c(x, y)
-    } else{
-      frags[[paste(time[1], "_", time[length(time)], "_", name, sep = "")]] = c(vt, vr)
-      xys[[paste(time[1], "_", time[length(time)], "_", name, sep = "")]] = c(x, y)
-    }
-  }
-  
-  #Remove elements with NAs
-  frags = frags[lapply(frags, function(x)
-    sum(is.na(x))) < 1]
-  xys = xys[lapply(xys, function(x)
-    sum(is.na(x))) < 1]
-  
-  #Combine into df
-  if (return_xy_windows == TRUE) {
-    df = do.call(cbind, frags)
-    xys_df = do.call(cbind, xys)
-    
-    l = list(df, xys_df)
-    names(l) = c("velocity_windows", "xy_windows")
-    return(l)
-  } else{
-    df = do.call(cbind, frags)
-    return(df)
-  }
-}
-
-#Function to bin a umap space into a n x n grid (umap coordinates are provided as the 'layout' object)
+##'bin_umap': Bins a umap space into a nxn gird (umap coordinates are to be contained in the 'layout' object)
 bin_umap = function(layout,
                     n_bins) {
-  n = n_bins
-  
-  #Split x into n bins
+  #Generate a vector of all possible binned x coordinates
   x1 = seq(min(layout[, 1]),
            max(layout[, 1]),
-           (max(layout[, 1]) - min(layout[, 1])) / n)
-  names(x1) = seq(1, n + 1, 1)
+           (max(layout[, 1]) - min(layout[, 1])) / n_bins)
   
+  #Name the binned x coordinates
+  names(x1) = seq(1, n_bins + 1, 1)
+  
+  #Calculate distance of all x points to the binned x coordinates, select the binned x coordinate that is closest
   xnew = apply(layout, 1, function(x)
     names(x1)[which.min(abs(as.numeric(x[1]) - x1))])
+  
+  #Add binned coordinates to the umap layout as 'xnew'
   layout$xnew = xnew
   
-  #Split y into n bins
+  #Generate a vector of all possible binned y coordinates
   y1 = seq(min(layout[, 2]),
            max(layout[, 2]),
-           (max(layout[, 2]) - min(layout[, 2])) / n)
-  names(y1) = seq(1, n + 1, 1)
+           (max(layout[, 2]) - min(layout[, 2])) / n_bins)
   
+  #Name the binned y coordinates
+  names(y1) = seq(1, n_bins + 1, 1)
+  
+  #Calculate distance of all y points to the binned y coordinates, select the binned y coordinate that is closest
   ynew = apply(layout, 1, function(x)
     names(y1)[which.min(abs(as.numeric(x[2]) - y1))])
+  
+  #Add binned coordinates to the umap layout as 'ynew'
   layout$ynew = ynew
   
-  #Paste xy to get unique bin combos (this will be input to sling shot as 'clusters')
+  #Paste xy to get unique bin combos
   xy_new = paste(xnew, ynew, sep = "_")
+  
+  #Add to the umap layout as 'xy_new'
   layout$xy_new = xy_new
   
-  #Convert coordinates to numeric, sort first
+  #Exctract all unique binned values
   m = unique(xy_new)
   
+  #Sort x and y values
   y = as.numeric(unlist(lapply(strsplit(m, "_"), function(v) {
     v[2]
   })))
@@ -208,11 +153,13 @@ bin_umap = function(layout,
   })))
   m = m[order(x)]
   
-  #Get names
+  #Add numeric names to the sorted, binned xy coordinates (these will be used as numeric representations of the binned coordinates)
   names(m) = seq(1, length(m), 1)
+  
+  #Match to the real data
   names(xy_new) = names(m)[match(xy_new, m)]
   
-  #Get vector of coords
+  #Add the unique numeric coordinates to the umap layout as 'coords'
   layout$coords = as.numeric(names(xy_new))
   
   #Return
@@ -222,9 +169,11 @@ bin_umap = function(layout,
   return(l)
 }
 
-#Function to iteratively run umap on windows of a desired size
+##'iterative_umap': Generates a behavior space(s) from a given window size
+#Acts as the central function of the iterative window search procedure part of the TREBLE framework
+#The function expects a list of data feature matrices where list elements corresponding to individual trials
+#Can be run over a range of window sizes by looping over window size values
 iterative_umap = function(features,
-                          velocity_windows = FALSE,
                           verbose = FALSE,
                           plot = FALSE,
                           step_size = 1,
@@ -236,7 +185,7 @@ iterative_umap = function(features,
   if (verbose == TRUE) {
     print("Getting windows")
   }
-  #Get windows
+  #Create empty list to save windows into
   windows = list()
   
   #Set up plots
@@ -248,22 +197,16 @@ iterative_umap = function(features,
     rm(n, x, y)
   }
   
+  #Loop through trials and extract windows of desired size
   for (i in 1:length(features)) {
-    if (velocity_windows == TRUE) {
-      windows[[i]] = get_velocity_windows(features[[i]],
-                                          window_size = window_size,
-                                          step_size = step_size,
-                                          ...)
-    } else{
-      windows[[i]] = get_windows(features[[i]],
-                                 window_size = window_size,
-                                 step_size = step_size,
-                                 ...)
-    }
+    windows[[i]] = get_windows(features[[i]],
+                               window_size = window_size,
+                               step_size = step_size,
+                               ...)
   }
   
   if (run_umap == FALSE) {
-    #Return
+    #If UMAP is not being run, return the features and windows
     l = list(features, windows)
     names(l) = c("features", "windows")
     return(l)
@@ -272,20 +215,25 @@ iterative_umap = function(features,
       print("Running UMAP")
     }
     
-    #Run UMAP
+    #Generate empty list to save UMAP embeddings into
     umaps = list()
+    
+    #Loop through and generate UMAP embeddings from feature windows
     for (i in 1:length(features)) {
       if (verbose == TRUE) {
         print(paste("umap", i, "out of", length(features)))
       }
       
+      #Run UMAP
       if (verbose == TRUE) {
         umaps[[i]] = umap(t(windows[[i]]), verbose = TRUE)
       } else{
         umaps[[i]] = umap(t(windows[[i]]))
       }
       
+      #If desired, plot behavior space e,bedding
       if (plot == TRUE) {
+        #As points
         plot(
           umaps[[i]]$layout[, 1:2],
           bty = 'n',
@@ -296,6 +244,7 @@ iterative_umap = function(features,
           xlab = "",
           col = alpha('grey50', 0.5)
         )
+        #As lines
         plot(
           umaps[[i]]$layout[, 1:2],
           type = 'l',
@@ -329,30 +278,41 @@ iterative_umap = function(features,
   }
 }
 
-#Function to calculate distance between umap layouts using Procrustes and Euclidean distances
+##'run_procrustes': Calculates Euclidean and Procrustest distances between multiple UMAP embeddings generated by 'iterative_umap'
+#This function can be used as a diagnostic to identify the optimal window size to use for a given data set
+#Lower Procrustes values reflect similar structure in the UMAP embeddings across trials
+#Lower Euclidean distance values, along with decreased variance in distance, reflect 'smoother' UMAP embeddings
 run_procrustes = function(umaps,
                           run_protest = FALSE) {
-  #Get all combinations of umaps to compare
+  #Get all combinations of UMAP embeddings to compare
   x = combn(seq(1, length(umaps), 1), 2)
   
-  #Run
+  #Generate empty lists and vectors to save results
   pr_res = c()
   pr_sig = list()
   dists = c()
+  
+  #Loop through all combinations of UMAP embeddings and calculate procrustes distance
   for (i in 1:ncol(x)) {
+    #Calculate procrustes distance of embeddings
     pr = procrustes(umaps[[x[1, i]]][, 1:2],
                     umaps[[x[2, i]]][, 1:2])
+    
+    #Extract results
     pr_res = c(pr_res, summary(pr)$rmse)
     
+    #Calculate euclidean distance of all points in the two UMAP embeddings
     dists = c(dists, euc.dist(umaps[[x[1, i]]][, 1:2],
                               umaps[[x[2, i]]][, 1:2]))
     
+    #If desired, run the 'protest' function to calculate the significance of the procrustes distance calculations
     if (run_protest == TRUE) {
       pr_sig[[i]] = protest(umaps[[x[1, i]]][, 1:2],
                             umaps[[x[2, i]]][, 1:2])
     }
   }
   
+  #Return
   if (run_protest == TRUE) {
     res = list(pr_res, pr_sig)
     names(res) = c("procrustes", "protest")
@@ -363,21 +323,28 @@ run_procrustes = function(umaps,
   return(res)
 }
 
-#Function to calculate the amount and timing of recurrence in a behavior space
+##'calculate_recurrence': Measures the recurrence times (time it takes to return to a specific point) for all points in a behavior space
+#Useful for identifying the optimal window size to use for a given data set
+#Expects a list of UMAP embeddings as input ('umaps'); is often run with the results of multiple runs of 'iterative_umap'
 calculate_recurrence = function(umaps,
                                 filter_outliers = FALSE,
                                 n_bins = 16,
                                 plot = FALSE,
                                 verbose = FALSE,
                                 threshold = 0.05) {
+  #Generate empty to list to contain results
   results = list()
+  
+  #Loop through and calculate recurrence for all UMAP embeddings
   for (h in 1:length(umaps)) {
     if (verbose == TRUE) {
       print(paste(h, "out of", length(umaps)))
     }
     
+    #Extract embedding of interest
     u = umaps[[h]]
     
+    #Filter outliers based on xy coordinates, if desired
     if (filter_outliers == TRUE) {
       u$x[u$x > 30] = 30
       u$x[u$x < (-30)] = -30
@@ -385,13 +352,18 @@ calculate_recurrence = function(umaps,
       u$y[u$y < (-30)] = -30
     }
     
-    #Get distances
+    #Bin umap to desired resolution
     l = bin_umap(u,
                  n_bins = n_bins)$layout
+    
+    #Generate empty lists to save results
     res = list()
+    dists = list()
+    
+    #Extract all unique points in binned UMAP embedding (will be used for calculating recurrence times)
     pos = unique(l$xy_new)
     
-    dists = list()
+    #Loop through and calculate all returns to each binned position
     for (i in 1:length(pos)) {
       x = c(as.numeric(unlist(lapply(strsplit(pos[i], "_"), function(v) {
         v[1]
@@ -414,6 +386,7 @@ calculate_recurrence = function(umaps,
       ds[ds > thresh]
     })
     
+    #Calculate histogram of recurrences and plot if desired
     if (plot == TRUE) {
       histogram = hist(unlist(recs),
                        breaks = seq(1, max(unlist(recs), na.rm = TRUE), 1),
@@ -434,10 +407,11 @@ calculate_recurrence = function(umaps,
       prop_recurrent[[i]] = z
     }
     
-    #barplot(unlist(prop_recurrent))
+    #Calculate total amount of points that are recurrent at timepoint x
     total_recurrent = sum(lapply(recs, function(x)
       length(x)) > 0) / length(recs)
     
+    #Save into results list
     l = list(dists,
              unlist(recs),
              histogram,
@@ -453,6 +427,7 @@ calculate_recurrence = function(umaps,
     results[[h]] = l
   }
   
+  #Plot if desired
   if (plot == TRUE) {
     image(
       do.call(
@@ -475,10 +450,11 @@ calculate_recurrence = function(umaps,
     )
   }
   
+  #Return
   return(results)
 }
 
-#Function to calculate per bin entropies
+##'calculate_bin_entropies': Bins a UMAP embedding and calculates the overall entropy
 calculate_bin_entropies = function(bin,
                                    strain_coords,
                                    strain_xy,
@@ -550,7 +526,7 @@ calculate_bin_entropies = function(bin,
         
         ##Calculate probability density functions
         for (h in 1:nrow(series)) {
-          row = unlist(series[h, ])
+          row = unlist(series[h,])
           
           #Convert to coords
           row = cbind(as.numeric(unlist(lapply(strsplit(apply(as.data.frame(row), 1, function(x)
@@ -581,7 +557,7 @@ calculate_bin_entropies = function(bin,
       print("Calculating entropies")
       ##Calculate probability density functions
       for (h in 1:nrow(series)) {
-        row = unlist(series[h, ])
+        row = unlist(series[h,])
         
         #Convert to coords
         row = cbind(as.numeric(unlist(lapply(strsplit(apply(as.data.frame(row), 1, function(x)
@@ -608,158 +584,6 @@ calculate_bin_entropies = function(bin,
     
     l = list(series, entropies)
     names(l) = c("bouts", "entropies")
-    return(l)
-  }
-}
-
-#Function to compare UMAP distributions across trials/individuals via bin-wise Fisher's test
-run_umap_fishers = function(layout,
-                            individuals_vector,
-                            bin_umap = FALSE,
-                            n_bins = 32,
-                            odds_cutoff = 2,
-                            cex = 0.5,
-                            adjust_ps = FALSE,
-                            verbose = FALSE,
-                            return = FALSE) {
-  #Bin layout if desired
-  if (bin_umap == TRUE) {
-    layout = bin_umap(layout,
-                      n_bins = n_bins)$layout
-  }
-  
-  #Split layout
-  individuals = split(layout,
-                      individuals_vector)
-  
-  #Set up plots
-  n = length(individuals) * 2
-  x = ceiling(sqrt(n))
-  y = floor(sqrt(n))
-  par(mfrow = c(x, y), mar = c(2, 2, 2, 2))
-  rm(n, x, y)
-  
-  #Set up empty lists to save results
-  all_odds = list()
-  all_ps = list()
-  
-  #Loop through and run test on each individual
-  for (h in 1:length(individuals)) {
-    if (verbose == TRUE) {
-      print(paste('individual', h, 'out of', length(individuals)))
-    }
-    r = individuals[[h]]$xy_new
-    t = table(r)
-    xy_table = table(layout$xy_new)
-    
-    t = t[match(names(xy_table), names(t))]
-    names(t) = names(xy_table)
-    t[is.na(t)] = 0
-    
-    odds = c()
-    ps = c()
-    
-    for (i in 1:length(t)) {
-      w1 = t[i]
-      x1 = xy_table[grep(paste("^", names(t[i]), "$", sep = ""), names(xy_table))]
-      w2 = sum(t) - w1
-      x2 = sum(xy_table) - x1
-      
-      out = fisher.test(as.matrix(rbind(c(w1, w2),
-                                        c(x1, x2))))
-      
-      odds = c(odds, out$estimate)
-      ps = c(ps, out$p.value)
-    }
-    
-    #Adjust ps if desired
-    if (adjust_ps == TRUE) {
-      ps = ps * length(ps)
-    }
-    
-    #Add to list
-    all_odds[[as.character(h)]] = odds
-    all_ps[[as.character(h)]] = ps
-    
-    ##Plot odds ratios
-    #Round and change names
-    o = round(odds, 2)
-    names(o) = names(t)
-    
-    #Get colors
-    ints = seq(0, odds_cutoff, 0.01)
-    o[o > odds_cutoff] = odds_cutoff
-    cols = c(colorRampPalette(c("midnightblue", "grey90"))(length(seq(0, 1, 0.01))),
-             colorRampPalette(c("grey90", "darkred"))(length(seq(
-               1.01, odds_cutoff, 0.01
-             ))))
-    names(cols) = ints
-    cols = cols[match(o, names(cols))]
-    
-    #Plot
-    plot(
-      unlist(lapply(strsplit(names(
-        o
-      ), "_"), function(v) {
-        v[1]
-      })),
-      unlist(lapply(strsplit(names(
-        o
-      ), "_"), function(v) {
-        v[2]
-      })),
-      pch = 20,
-      cex = cex,
-      col = cols,
-      cex.axis = 1.5,
-      cex.lab = 1.5,
-      xaxt = 'n',
-      yaxt = 'n',
-      ylab = "",
-      xlab = "",
-      bty = 'n'
-    )
-    title(main = 'Odds ratios',
-          cex.main = 1.5,
-          font.main = 1)
-    
-    ##Plot p values
-    #Set up colors
-    cols = rep('grey90', length(ps))
-    cols[ps < 0.05] = 'red'
-    
-    #Plot
-    plot(
-      unlist(lapply(strsplit(names(
-        o
-      ), "_"), function(v) {
-        v[1]
-      })),
-      unlist(lapply(strsplit(names(
-        o
-      ), "_"), function(v) {
-        v[2]
-      })),
-      pch = 20,
-      cex = cex,
-      col = cols,
-      cex.axis = 1.5,
-      cex.lab = 1.5,
-      xaxt = 'n',
-      yaxt = 'n',
-      ylab = "",
-      xlab = "",
-      bty = 'n'
-    )
-    title(main = 'p-values',
-          cex.main = 1.5,
-          font.main = 1)
-  }
-  
-  #Return if desired
-  if (return == TRUE) {
-    l = list(all_odds, all_ps)
-    names(l) = c('odds_ratios', 'p_values')
     return(l)
   }
 }
