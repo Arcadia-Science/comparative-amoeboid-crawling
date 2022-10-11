@@ -6,10 +6,6 @@
 
 This repository contains analysis code to accompany the publication ['Comparative analyses reveal substantial variation among unicellular organisms'](https://research.arcadiascience.com/pub/result-comparative-crawling).
 
-Notebooks containing expanded methods and the code + analyses for generating all figures in the publication can be run in Binder:
-
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ryanayork/comparative-amoeboid-crawling/main)
-
 ## Directory structure
 
 `00_data/` Cell shape data matrices for all cell types/trials examined in the pub.<br>
