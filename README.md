@@ -38,3 +38,4 @@ Notebooks containing expanded methods and the code + analyses for generating all
 `gtools v3.9.2`<br>
 `pracma v2.3.6`<br>
 `fractaldim v0.8-5`<br>
+`here v1.0.0`<br>
