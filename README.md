@@ -9,6 +9,7 @@ This repository contains analysis code to accompany the publication ['Comparativ
 Notebooks containing expanded methods and the code + analyses for generating all figures in the publication can be run in Binder:
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Arcadia-Science/comparative-amoeboid-crawling/HEAD)
 
+**Note for Binder users:** For repositories that rely on a lot of packages, the launch process may take some time and you may see the error message `Failed to connect to event stream`. This means that the connection between the logs service and the UI is broken. But the build is still happening in the background and the UI should fix itself upon refreshing the page. You can learn more about this issue [here](https://discourse.jupyter.org/t/failed-to-connect-to-event-stream/527).
 
 ## Directory structure
 
