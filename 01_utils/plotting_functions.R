@@ -32,25 +32,25 @@ plot_parameter <-
   function(parameter, layout, n_bins, return = FALSE, ...) {
     #Bin layout onto a discrete grid of nxn size (determined by the 'n_bins' argument)
     layout <- bin_umap(layout, n_bins = n_bins)$layout
-    
+
     #Split the parameter of choice based on layout position
     a <- parameter
     a <- split(a[1:nrow(layout)], layout$xy_new)
-    
+
     #Calculate mean parameter values as a function of behavior space position
     a <- unlist(lapply(a, function(x)
       mean(x, na.rm = TRUE)))
-    
+
     #Make a matrix containing all possible behavior space positions (indexed as in 'xy_new' i.e. x coord, '_', y coord)
     p <- expand.grid(seq(1, n_bins + 1, 1), seq(1, n_bins + 1, 1))
-    
+
     #Combine using an underscore to match the indices of 'xy_new'
     p <- paste(p[, 1], p[, 2], sep = "_")
-    
+
     #Match the mean parameter value names (which correspond to 'xy_new') with the full list of positions
     a <- a[match(p, names(a))]
     names(a) <- p
-    
+
     #Plot using image, converting the mean parameter values into a matrix of size n_bins x n_bins
     image(
       matrix(a, nrow = n_bins + 1),
@@ -61,7 +61,7 @@ plot_parameter <-
       bty = "n",
       ...
     )
-    
+
     #Return parameter values if desired
     if (return == TRUE) {
       return(a)
@@ -87,11 +87,11 @@ plot_results <- function(res_list,
     means <- unlist(lapply(res_list, function(x)
       mean(x)))
   }
-  
+
   #Calculate boxplot statistics for all data groups
   error <- lapply(res_list, function(x)
     boxplot.stats(x)$stats)
-  
+
   #If 'plot_as_lines' is desired, plot the resulting means as connected lines with error represented as polygons
   if (plot_as_lines == TRUE) {
     #Generate empty plot
@@ -180,7 +180,7 @@ plot_results <- function(res_list,
       col = col1
     )
   }
-  
+
   #Return results
   l <- list(means, error)
   names(l) <- c("means", "error")
@@ -197,7 +197,7 @@ plot_variance <- function(res_list,
   #Calculate mean normalized variance
   variance <- unlist(lapply(res_list, function(x)
     sd(x) / mean(x)))
-  
+
   #Initiate plot
   plot(
     variance,
@@ -246,7 +246,7 @@ plot_recurrence <- function(recurrences,
   # Initiate plot parameters
   par(mfrow = c(length(recurrences), 1))
   par(mar = mar)
-  
+
   #Loop through and plot recurrence distributions for each window size
   for (i in 1:length(recurrences)) {
     #Plot heatmap of recurrence distributions using the 'image' function
@@ -294,20 +294,20 @@ plot_vector_field <- function(layout,
   if (bin_umap == TRUE) {
     layout <- bin_umap(layout, n_bins = n_bins)$layout
   }
-  
+
   #Calculate the change in x and y coordinates for all points in time contained in the behavior space
   layout$dx <- c(0, diff(layout$x))
   layout$dy <- c(0, diff(layout$y))
-  
+
   #Split the behavior space layout on unique xy coordinates
   bins <- split(layout, layout$xy)
-  
+
   #Calculate mean x and y coordinate changes for each bin
   dx_mean <- lapply(bins, function(x)
     mean(x$dx))
   dy_mean <- lapply(bins, function(x)
     mean(x$dy))
-  
+
   #Generate matrix of mean x and y coordinate changes
   df <- data.frame(
     x = as.numeric(unlist(lapply(strsplit(names(dx_mean), "_"), function(v) {
@@ -319,7 +319,7 @@ plot_vector_field <- function(layout,
     dx = unlist(dx_mean),
     dy = unlist(dy_mean)
   )
-  
+
   #Calculate theta (angle between point of origin and the average xy coordinates for all moments exiting that position)
   df$theta <- rep(NA, nrow(df))
   for (i in 1:nrow(df)) {
@@ -327,10 +327,10 @@ plot_vector_field <- function(layout,
     y1 <- df[i, 2]
     x2 <- df[i, 1] + df[i, 3]
     y2 <- df[i, 2] + df[i, 4]
-    
+
     df$theta[i] <- atan2(y2 - y1, x2 - x1) * (180 / pi)
   }
-  
+
   #Calculate the euclidean distance between the point of origin and the mean coordinates of subsequent time points
   df$dist <- rep(NA, nrow(df))
   for (i in 1:nrow(df)) {
@@ -338,21 +338,21 @@ plot_vector_field <- function(layout,
     y1 <- df[i, 2]
     x2 <- df[i, 1] + df[i, 3]
     y2 <- df[i, 2] + df[i, 4]
-    
+
     df$dist[i] <- euc.dist(c(x1, y1), c(x2, y2))
   }
-  
+
   #Set up plot parameters
   par(mar = c(1, 1, 1, 1))
-  
+
   #If desired, plot vector field with arrows colored by theta (angle)
   if (color_by_theta == TRUE) {
     #Round theta values
     theta <- round(df$theta)
-    
+
     #Generate all possible angle values to assign colors to
     s <- seq(-180, 180, 1)
-    
+
     #Generate color ramp palette
     cols <- c(
       colorRampPalette(c("midnightblue", "cyan4"))(90),
@@ -360,11 +360,11 @@ plot_vector_field <- function(layout,
       colorRampPalette(c("lightgoldenrod1", "sienna2"))(90),
       colorRampPalette(c("sienna2", "orangered3"))(91)
     )
-    
+
     #Match colors to angles
     names(cols) <- s
     cols <- cols[match(theta, names(cols))]
-    
+
     #Initiate plot
     plot(
       df$x,
@@ -439,17 +439,17 @@ plot_umap_features <- function(layout,
     layout <- bin_umap(layout,
                        n_bins = n_bins)$layout
   }
-  
+
   # Get vector of rows to split windows on (as a function of feature number)
   tosplit <- rep(1:n_features,
                  each = (nrow(windows) / n_features))
-  
+
   # Split windows on features
   feat <- split(as.data.frame(windows), tosplit)
-  
+
   # Get colors
   cols <- colorRampPalette(colors)(n_features)
-  
+
   # Set up plotting aesthetics
   par(
     mfrow = c(1, n_features),
@@ -458,35 +458,35 @@ plot_umap_features <- function(layout,
     yaxt = "n",
     mar = c(2, 2, 2, 2)
   )
-  
+
   # Loop through features and plot
   for (i in 1:length(feat)) {
     # Calculate mean feature value per window
     m <- colMeans(feat[[i]])
-    
+
     # Match to layout
     m <- m[1:nrow(layout)]
-    
+
     # Add to layout
     if (is.null(feature_names) == FALSE) {
       layout[, feature_names[i]] <- m
     } else {
       layout <- cbind(layout, m)
     }
-    
+
     if (plot_points == TRUE) {
       # Round mean feature value
       m <- round(m, 2)
-      
+
       # Take absolute value
       m <- abs(m)
-      
+
       # Get colors
       p <-
         colorRampPalette(c("grey90", cols[i]))(length(seq(0, max(m), 0.01)))
       names(p) <- seq(0, max(m), 0.01)
       p <- p[match(m, names(p))]
-      
+
       # Plot
       plot(
         layout[, 1:2],
@@ -496,7 +496,7 @@ plot_umap_features <- function(layout,
         xlab = "",
         ...
       )
-      
+
       if (is.null(feature_names) == FALSE) {
         title(main = feature_names[i],
               cex.main = 1.5,
@@ -505,26 +505,26 @@ plot_umap_features <- function(layout,
     } else {
       # Split on bin
       m <- split(m, layout$xy_new)
-      
+
       # Get mean per bin
       m <- lapply(m, function(x)
         mean(x, na.rm = TRUE))
-      
+
       # Unlist
       m <- unlist(m)
-      
+
       # Round mean feature value
       m <- round(m, 2)
-      
+
       # Take absolute value
       m <- abs(m)
-      
+
       # Get colors
       p <-
         colorRampPalette(c("grey90", cols[i]))(length(seq(0, max(m), 0.01)))
       names(p) <- seq(0, max(m), 0.01)
       p <- p[match(m, names(p))]
-      
+
       # Plot
       plot(
         unlist(lapply(strsplit(names(
@@ -543,7 +543,7 @@ plot_umap_features <- function(layout,
         xlab = "",
         ...
       )
-      
+
       if (is.null(feature_names) == FALSE) {
         title(main = feature_names[i],
               cex.main = 1.5,
@@ -567,7 +567,7 @@ plot_umap_pdf <- function(layout,
                layout$y,
                h = h,
                n = n)
-  
+
   # Initiate plot
   par(
     mar = c(1, 1, 1, 1),
@@ -575,13 +575,13 @@ plot_umap_pdf <- function(layout,
     xaxt = "n",
     yaxt = "n"
   )
-  
+
   #Plot with image
   image(pdf$z,
         xlab = "",
         ylab = "",
         col = colors)
-  
+
   # Return if desired
   if (return == TRUE) {
     return(pdf)

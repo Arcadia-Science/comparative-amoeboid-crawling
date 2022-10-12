@@ -28,7 +28,7 @@ splitWithOverlap <- function(vec, seg_length, overlap) {
   starts = seq(1, nrow(vec), by = seg_length - overlap)
   ends   = starts + seg_length - 1
   ends[ends > nrow(vec)] = nrow(vec)
-  
+
   lapply(1:length(starts), function(i)
     vec[starts[i]:ends[i], ])
 }
@@ -65,10 +65,10 @@ fit.ellipse <- function (x, y = NULL) {
   # major - major semi-axis length
   #
   # minor - minor semi-axis length
-  
+
   EPS <- 1.0e-8
   dat <- xy.coords(x, y)
-  
+
   D1 <- cbind(dat$x * dat$x, dat$x * dat$y, dat$y * dat$y)
   D2 <- cbind(dat$x, dat$y, 1)
   S1 <- t(D1) %*% D1
@@ -82,7 +82,7 @@ fit.ellipse <- function (x, y = NULL) {
   a1 <- evec[, which(cond > 0)]
   f <- c(a1, T %*% a1)
   names(f) <- letters[1:6]
-  
+
   # calculate the center and lengths of the semi-axes
   A <-
     matrix(
@@ -97,24 +97,24 @@ fit.ellipse <- function (x, y = NULL) {
               byrow = T)
   soln <- solve(A) %*% b
   b2 <- f[2] ^ 2 / 4
-  
+
   center <- c(soln[1], soln[2])
   names(center) <- c("x", "y")
-  
+
   num  <-
     2 * (f[1] * f[5] ^ 2 / 4 + f[3] * f[4] ^ 2 / 4 + f[6] * b2 - f[2] * f[4] *
            f[5] / 4 - f[1] * f[3] * f[6])
   den1 <- (b2 - f[1] * f[3])
   den2 <- sqrt((f[1] - f[3]) ^ 2 + 4 * b2)
   den3 <- f[1] + f[3]
-  
+
   semi.axes <-
     sqrt(c(num / (den1 * (den2 - den3)),  num / (den1 * (-den2 - den3))))
-  
+
   # calculate the angle of rotation
   term <- (f[1] - f[3]) / f[2]
   angle <- atan(1 / term) / 2
-  
+
   list(
     coef = f,
     center = center,
