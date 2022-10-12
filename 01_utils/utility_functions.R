@@ -19,6 +19,7 @@ library(gtools)
 library(entropy)
 library(pracma)
 library(fractaldim)
+library(gplots)
 
 ###########################
 ##### Utility functions#####
