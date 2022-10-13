@@ -2,9 +2,13 @@
 
 Notebook 1 covers loading the pre-processed images and generating common ‘shape components’ using principal component analysis. It then goes on to cover how to run an iterative window search using the shape components. The goal of this search is to identify an ‘optimal’ window size to use for making a universal movement space (the theory and methodology of which are also covered in this notebook). Finally, we outline the creation of the movement space using the chosen window size.
 
+---
+
 **Notebook 2: Exploring movement space**
 
 Notebook 2 walks through the annotation of movement space, including calculation of geometric measures to describe cell shape, and comparing basic cell type differences in movement and geometry.
+
+---
 
 **Notebook 3: Comparing cell type variance and temporal structure**
 
