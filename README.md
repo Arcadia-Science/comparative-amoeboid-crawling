@@ -4,7 +4,7 @@
 
 ---
 
-This repository contains analysis code to accompany the publication ['Comparative analyses reveal substantial variation among unicellular organisms'](https://research.arcadiascience.com/pub/result-comparative-crawling).
+This repository contains analysis code to accompany the publication ['Distinct spatiotemporal movement properties reveal sub-modalities in crawling cell types'](https://research.arcadiascience.com/pub/result-comparative-crawling).
 
 Notebooks containing expanded methods and the code + analyses for generating all figures in the publication can be run in Binder:
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Arcadia-Science/comparative-amoeboid-crawling/HEAD)
