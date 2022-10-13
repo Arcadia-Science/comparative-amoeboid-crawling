@@ -6,10 +6,10 @@
 
 **Notebook 2: Exploring movement space**
 
-**Notebook 2 walks** through the annotation of movement space, including calculation of geometric measures to describe cell shape, and comparing basic cell type differences in movement and geometry.
+[Notebook 2](https://github.com/Arcadia-Science/comparative-amoeboid-crawling/blob/main/03_notebooks/notebook_2_exploring_movement_space.ipynb) walks through the annotation of movement space, including calculation of geometric measures to describe cell shape, and comparing basic cell type differences in movement and geometry.
 
 ---
 
 **Notebook 3: Comparing cell type variance and temporal structure**
 
-**Notebook 3** builds on the first two to explore patterns of inter- and intra-specific variation among the cell types. First, movement variation is compared across cell types by assessing differences in occupation in, and trajectories through, movement space. It then covers how to measure temporal patterns in movement. Finally, we interrogate the relationship between cell shape and movement.
+[Notebook 3](https://github.com/Arcadia-Science/comparative-amoeboid-crawling/blob/main/03_notebooks/notebook_3_comparing_cell_type_variance_and_temporal_structure.ipynb) builds on the first two to explore patterns of inter- and intra-specific variation among the cell types. First, movement variation is compared across cell types by assessing differences in occupation in, and trajectories through, movement space. It then covers how to measure temporal patterns in movement. Finally, we interrogate the relationship between cell shape and movement.
