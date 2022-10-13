@@ -1,3 +1,5 @@
+# Comparative amoeboid crawling
+
 ![github_front_page_figure](https://user-images.githubusercontent.com/64554648/182730384-e9e60ead-8651-4c23-a484-b69bdd6ffe88.png)
 
 ---
