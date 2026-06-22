@@ -17,9 +17,12 @@ detachAllPackages <- function() {
     for (package in package.list) {   
       detach(package, character.only = TRUE)   
     }   
-  }    
+  }
 }
-detachAllPackages()
+# NOTE: detachAllPackages() is intentionally not called at source time. Doing so
+# silently detaches any packages the user has loaded (a footgun if this file is
+# sourced after the user's own libraries). The function is left defined so it can
+# be called explicitly if needed. The required packages are loaded directly below.
 
 library(umap)
 library(scales)
@@ -303,7 +306,7 @@ iterative_umap <- function(features,
     
     # Return
     if (return_windows == TRUE) {
-      l <- list(vel, windows, umaps)
+      l <- list(features, windows, umaps)
       names(l) <- c("features", "windows", "umaps")
     } else {
       l <- list(umaps)
